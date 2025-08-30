@@ -158,12 +158,12 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-# CELERY_BEAT_SCHEDULE = {
-#     "deactivate_inactive_users": {
-#         "task": "user.tasks.deactivate_inactive_users",
-#         "schedule": timedelta(days=1),
-#     },
-# }
+CELERY_BEAT_SCHEDULE = {
+    "send_reminder_with_bot": {
+        "task": "habits.tasks.send_reminder_with_bot",
+        "schedule": timedelta(days=1),
+    },
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST')
@@ -173,3 +173,7 @@ EMAIL_USE_TLS = True if  os.getenv('EMAIL_USE_TLS') == 'True' else False
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_URL = "https://api.telegram.org/bot"
+

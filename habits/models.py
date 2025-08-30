@@ -74,7 +74,7 @@ class Habit(models.Model):
     is_active = models.BooleanField(verbose_name="Признак активности", default=True)
 
     def __str__(self):
-        return f"Сегодня нужно {self.action}."
+        return f"Я буду {self.action} в {self.time_deadline} в {self.location}."
 
     class Meta:
         verbose_name = "Привычка"

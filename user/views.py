@@ -39,7 +39,7 @@ class UserCreateAPIView(CreateAPIView):
     ),
 )
 class UserListAPIView(ListAPIView):
-    serializer_class = UserSerializers
+    serializer_class = UserPublicSerializer
     queryset = User.objects.all()
 
 

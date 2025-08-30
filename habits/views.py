@@ -3,9 +3,12 @@ from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import DestroyAPIView, RetrieveAPIView, UpdateAPIView, ListAPIView, CreateAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from habits.models import Habit
+from habits.paginators import CustomPaginator
+from habits.serializers import HabitSerializer, PublicListHabitSerializer
 
 
 @method_decorator(
@@ -21,8 +24,9 @@ class HabitListAPIView(ListAPIView):
     Реализована пагинация по 5 элементов на странице.
     """
 
-    # serializer_class = HabitSerializer
-    # pagination_class = CustomPaginator
+    serializer_class = HabitSerializer
+    pagination_class = CustomPaginator
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -48,9 +52,9 @@ class PublicHabitListAPIView(ListAPIView):
     Реализована пагинация по 5 элементов на странице.
     """
 
-    # serializer_class = HabitSerializer
-    # pagination_class = CustomPaginator
-    # permission_classes = (AllowAny,)
+    serializer_class = PublicListHabitSerializer
+    pagination_class = CustomPaginator
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         return Habit.objects.filter(is_public=True)
@@ -68,7 +72,7 @@ class HabitCreateAPIView(CreateAPIView):
     Параллельно создается периодическая задача в зависимости от указанной периодичности привычки.
     """
     queryset = Habit.objects.all()
-    # serializer_class = HabitSerializer
+    serializer_class = HabitSerializer
 
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:
@@ -76,13 +80,6 @@ class HabitCreateAPIView(CreateAPIView):
         habit = serializer.save()
         habit.owner = self.request.user
         habit.save()
-
-        # if 'Каждые' in habit.periodicity or 'Еже' in habit.periodicity:
-        #     set_schedule_every_day(habit.id, habit.periodicity)
-        # elif 'раза' in habit.periodicity:
-        #     set_schedule_a_few_time(habit.id, habit.periodicity)
-        # elif 'По' in habit.periodicity:
-        #     set_schedule_every_weekday(habit.id, habit.periodicity)
 
 
 @method_decorator(
@@ -103,7 +100,7 @@ class HabitUpdateAPIView(UpdateAPIView):
     Доступ к конкретным привычкам есть только у создателя привычки, модератора и суперпользователя.
     """
     queryset = Habit.objects.all()
-    # serializer_class = HabitSerializer
+    serializer_class = HabitSerializer
 
     def perform_update(self, serializer):
         user = self.request.user
@@ -127,7 +124,7 @@ class HabitRetrieveAPIView(RetrieveAPIView):
     Непубличную привычку может просматривать только создатель, модератор и суперпользователь.
     """
     queryset = Habit.objects.all()
-    # serializer_class = HabitSerializer
+    serializer_class = HabitSerializer
 
     def get_object(self):
         obj = super().get_object()
@@ -154,7 +151,7 @@ class HabitDestroyAPIView(DestroyAPIView):
     """
 
     queryset = Habit.objects.all()
-    # serializer_class = HabitSerializer
+    serializer_class = HabitSerializer
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
