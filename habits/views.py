@@ -30,14 +30,7 @@ class HabitListAPIView(ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-
-        if user.is_superuser or user.is_staff:
-            return Habit.objects.all()
-
-        if not user.is_authenticated:
-            raise PermissionDenied("Требуется авторизация.")
-
-        return Habit.objects.filter(owner=self.request.user, is_active=True)
+        return Habit.objects.filter(owner=self.request.user)
 
 
 @method_decorator(
@@ -73,13 +66,7 @@ class HabitCreateAPIView(CreateAPIView):
     """
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
-
-    def perform_create(self, serializer):
-        if not self.request.user.is_authenticated:
-            raise PermissionDenied("Требуется авторизация для создания привычки.")
-        habit = serializer.save()
-        habit.owner = self.request.user
-        habit.save()
+    permission_classes = [IsAuthenticated]
 
 
 @method_decorator(
@@ -106,7 +93,7 @@ class HabitUpdateAPIView(UpdateAPIView):
         user = self.request.user
         habit = self.get_object()
 
-        if not (user == habit.owner or user.is_staff or user.is_superuser):
+        if not user == habit.owner:
             raise PermissionDenied("У Вас нет прав редактировать эту привычку.")
         serializer.save()
 
@@ -130,9 +117,7 @@ class HabitRetrieveAPIView(RetrieveAPIView):
         obj = super().get_object()
 
         if not (obj.is_public or
-                obj.owner == self.request.user or
-                self.request.user.is_staff or
-                self.request.user.is_superuser):
+                obj.owner == self.request.user):
             raise PermissionDenied(
                 "У Вас нет прав просматривать информацию об этой привычке."
             )
@@ -147,7 +132,7 @@ class HabitRetrieveAPIView(RetrieveAPIView):
 )
 class HabitDestroyAPIView(DestroyAPIView):
     """
-    Суперпользователь может удалять привычку из БД. Обычный пользователь может только изменить статус активности.
+    Владелец привычки может удалять привычку из БД.
     """
 
     queryset = Habit.objects.all()
@@ -155,14 +140,8 @@ class HabitDestroyAPIView(DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-
-        if request.user.is_superuser:
-            instance.delete()
-            return Response(status=204)
-
-        elif request.user != instance.owner:
+        if request.user != instance.owner:
             raise PermissionDenied("У вас нет прав на удаление этой привычки.")
 
-        instance.is_active = False
-        instance.save(update_fields=['is_active'])
+        self.perform_destroy(instance)
         return Response(status=204)
