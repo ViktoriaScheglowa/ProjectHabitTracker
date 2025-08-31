@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from user.models import User
 
@@ -12,20 +13,15 @@ class Habit(models.Model):
         max_length=30,
         verbose_name="Место",
         help_text="Место, в котором необходимо выполнять привычку",
-        null=True,
-        blank=True,
     )
     date_deadline = models.DateField(
+        default=timezone.now,
         verbose_name="Дата выполнения привычки",
         help_text="Дата, когда необходимо выполнять привычку",
-        null=True,
-        blank=True,
     )
     time_deadline = models.TimeField(
         verbose_name="Время выполнения привычки",
         help_text="Время, когда необходимо выполнять привычку",
-        null=True,
-        blank=True,
     )
     action = models.CharField(
         max_length=50,
@@ -35,8 +31,6 @@ class Habit(models.Model):
     is_enjoyable = models.BooleanField(
         verbose_name="Признак приятной привычки",
         help_text="Привычка, способ вознаградить себя за выполнение полезной привычки",
-        null=True,
-        blank=True,
     )
     associated_habit = models.ForeignKey(
         "Habit",
