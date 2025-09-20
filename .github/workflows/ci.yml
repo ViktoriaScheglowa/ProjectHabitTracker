@@ -108,10 +108,10 @@ jobs:
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/ProjectHabitTracker:${{ github.sha }} .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/projecthabittracker:${{ github.sha }} .
 
       - name: Push Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/ProjectHabitTracker:${{ github.sha }}
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/projecthabittracker:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -129,7 +129,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            cd /home/${{ secrets.SSH_USER }}/ProjectHabitTracker || mkdir -p /home/${{ secrets.SSH_USER }}/projecthome30.1 && cd /home/${{ secrets.SSH_USER }}/projecthome30.1
+            cd /home/${{ secrets.SSH_USER }}/projecthabittracker || mkdir -p /home/${{ secrets.SSH_USER }}/projecthabittracker && cd /home/${{ secrets.SSH_USER }}/projecthabittracker
             cat < 'EOF' > .env
             SECRET_KEY="${{ secrets.SECRET_KEY }}"
             NAME="${{ secrets.NAME }}"
