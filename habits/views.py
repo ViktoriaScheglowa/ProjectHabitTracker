@@ -2,7 +2,13 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import DestroyAPIView, RetrieveAPIView, UpdateAPIView, ListAPIView, CreateAPIView
+from rest_framework.generics import (
+    DestroyAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+    ListAPIView,
+    CreateAPIView,
+)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -64,6 +70,7 @@ class HabitCreateAPIView(CreateAPIView):
     Создание новой привычки. Требуются авторизация.
     Параллельно создается периодическая задача в зависимости от указанной периодичности привычки.
     """
+
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
     permission_classes = [IsAuthenticated]
@@ -86,6 +93,7 @@ class HabitUpdateAPIView(UpdateAPIView):
     Редактирование информации о привычке.
     Доступ к конкретным привычкам есть только у создателя привычки, модератора и суперпользователя.
     """
+
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
 
@@ -110,14 +118,14 @@ class HabitRetrieveAPIView(RetrieveAPIView):
     Неавторизованный пользователь может просматривать только публичные привычки.
     Непубличную привычку может просматривать только создатель, модератор и суперпользователь.
     """
+
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
 
     def get_object(self):
         obj = super().get_object()
 
-        if not (obj.is_public or
-                obj.owner == self.request.user):
+        if not (obj.is_public or obj.owner == self.request.user):
             raise PermissionDenied(
                 "У Вас нет прав просматривать информацию об этой привычке."
             )

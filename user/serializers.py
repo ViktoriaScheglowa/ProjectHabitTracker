@@ -38,4 +38,4 @@ class UserDetailSerializer(ModelSerializer):
             "country",
             "avatar",
             "chat_id",
-            ]
+        ]

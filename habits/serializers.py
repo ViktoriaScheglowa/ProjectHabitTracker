@@ -1,7 +1,12 @@
 from rest_framework import serializers
 
 from habits.models import Habit
-from habits.validators import CheckHabitValidator, TimeToCompleteValidator, DateDeadlineValidator, PeriodicityValidator
+from habits.validators import (
+    CheckHabitValidator,
+    TimeToCompleteValidator,
+    DateDeadlineValidator,
+    PeriodicityValidator,
+)
 
 
 class HabitSerializer(serializers.ModelSerializer):
@@ -24,4 +29,4 @@ class HabitSerializer(serializers.ModelSerializer):
 class PublicListHabitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Habit
-        fields = ('id', 'action', 'periodicity', 'time_to_complete', 'is_public')
+        fields = ("id", "action", "periodicity", "time_to_complete", "is_public")
