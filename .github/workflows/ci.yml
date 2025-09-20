@@ -129,8 +129,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            cd /home/${{ secrets.SSH_USER }}/projecthabittracker || mkdir -p /home/${{ secrets.SSH_USER }}/projecthabittracker && cd /home/${{ secrets.SSH_USER }}/projecthabittracker
-            cat < 'EOF' > .env
+            PROJECT_PATH="/home/${{ secrets.SSH_USER }}/projecthome30.1"
+            mkdir -p "$PROJECT_PATH"
+            cd "$PROJECT_PATH"
+            cat << 'EOF' > .env
             SECRET_KEY="${{ secrets.SECRET_KEY }}"
             NAME="${{ secrets.NAME }}"
             USER="${{ secrets.USER }}"
@@ -139,7 +141,7 @@ jobs:
             PORT="${{ secrets.PORT }}"
             
             # Django
-            DEBUG=True
+            DEBUG=False
             
             # Stripe
             STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}
@@ -152,12 +154,16 @@ jobs:
             
             EOF
             
-            git pull origin feature1
+            git fetch --all
+            git reset --hard origin/${{ github.ref_name }}
             
-            source ~/venv/bin/activate && pip install -r ~/requirements.txt
-          
-            python ~/manage.py migrate
-          
-            python ~/manage.py collectstatic --noinput
-          
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+
+            source venv/bin/activate
+
+            pip install -r requirements.txt
+            python manage.py migrate
+            python manage.py collectstatic --noinput
             sudo systemctl restart myapp.service || true
