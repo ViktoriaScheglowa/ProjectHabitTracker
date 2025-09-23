@@ -9,23 +9,14 @@ services:
       - static_volume:/ProjectHabitTracker/static
       - media_volume:/ProjectHabitTracker/media
     ports:
-      - "8000:8000"
+      - "8080:8000"
     depends_on:
       - db
       - redis
     env_file:
       - .env
 
-  nginx:
-    build:
-      context: ./nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - static_volume:/ProjectHabitTracker/static
-    depends_on:
-      - web
+
 
   db:
     image: postgres:16.0
@@ -75,6 +66,35 @@ services:
       - db
       - redis
 
+  backend:
+    build: .
+    command: bash -c "python manage.py migrate && python manage.py collectstatic -c --no-input && python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      REDIS_URL: "redis://localhost:6379"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - django_static:/app/static/
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - django_static:/app/static/
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/ProjectHabitTracker/static
+    depends_on:
+      backend:
+        condition: service_started
+
 networks:
   default:
 
@@ -83,3 +103,5 @@ volumes:
   static_volume:
   redis_data:
   media_volume:
+  django_static:
+
