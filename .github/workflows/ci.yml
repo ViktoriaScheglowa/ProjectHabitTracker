@@ -141,6 +141,27 @@ jobs:
           sudo apt install python3 python3-pip python3-venv -y
           EOF
 
+      - name: Deploy to Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e
+            
+            # Установка Docker через официальный скрипт
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            
+            # Добавляем пользователя в группу docker
+            sudo usermod -aG docker $USER
+            
+            # Запускаем демон Docker
+            sudo systemctl enable docker
+            sudo systemctl start docker
+            
+            # Проверяем установку
+            docker --version
+            echo "Docker installed and running!"
+          EOF
+
       - name: Deploy Application
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
