@@ -25,7 +25,7 @@ jobs:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_DB: training
+          POSTGRES_DB: habits
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: 15111983
         ports: ['5432:5432']
