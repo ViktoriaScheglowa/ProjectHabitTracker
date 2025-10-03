@@ -60,7 +60,7 @@ jobs:
     - name: Run migrations
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        NAME: habit
+        NAME: habits
         USER: postgres
         PASSWORD: 15111983
         HOST: 127.0.0.1
