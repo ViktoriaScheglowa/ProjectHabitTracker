@@ -168,6 +168,11 @@ jobs:
           tar --exclude='.git' \
             --exclude='node_modules' \
             --exclude='.github' \
+            --exclude='*.log' \
+            --exclude='__pycache__' \
+            --exclude='.pytest_cache' \
+            --exclude='*.pyc' \
+            --exclude='.DS_Store' \
             -czf deploy.tar.gz .
     
           # Копируем архив на сервер
