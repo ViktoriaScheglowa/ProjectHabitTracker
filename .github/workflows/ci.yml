@@ -180,14 +180,6 @@ jobs:
             sudo chown $USER:$USER $PROJECT_DIR
             cd $PROJECT_DIR
 
-            # Клонируем репозиторий (если нужно)
-            if [ ! -d ".git" ]; then
-                git clone ${{ github.repositoryUrl }} .
-            else
-                git fetch origin
-                git reset --hard origin/main
-            fi
-
             # Копируем .env файл если нужно
             if [ ! -f ".env" ]; then
                 cp .env.example .env 2>/dev/null || echo "No .env.example found"
