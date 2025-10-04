@@ -136,99 +136,97 @@ jobs:
           cd "$PROJECT_PATH"
           
           if [ ! -d ".venv" ]; then
+            sudo apt update
+            sudo apt install python3 python3-pip python3-venv -y
             python3 -m venv venv
           fi
-          sudo apt install python3 python3-pip python3-venv -y
           EOF
 
-      - name: Deploy to Server
+      - name: Install Docker on Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             set -e
             
-            # Установка Docker через официальный скрипт
-            curl -fsSL https://get.docker.com -o get-docker.sh
-            sudo sh get-docker.sh
-            
-            # Добавляем пользователя в группу docker
-            sudo usermod -aG docker $USER
-            
-            # Запускаем демон Docker
-            sudo systemctl enable docker
-            sudo systemctl start docker
+            # Проверяем установлен ли Docker
+            if ! command -v docker &> /dev/null; then
+              echo "Installing Docker..."
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sudo sh get-docker.sh
+              # Добавляем пользователя в группу docker
+              sudo usermod -aG docker $USER
+              
+              # Запускаем демон Docker
+              sudo systemctl enable docker
+              sudo systemctl start docker
+            fi
             
             # Проверяем установку
             docker --version
             echo "Docker installed and running!"
-          EOF
+            EOF
 
       - name: Deploy Application
         run: |
-          # Создаем архив со ВСЕМИ файлами
-          tar --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='.github' \
-            --exclude='*.log' \
-            --exclude='__pycache__' \
-            --exclude='.pytest_cache' \
-            --exclude='*.pyc' \
-            --exclude='.DS_Store' \
-            -czf deploy.tar.gz .
+          # Создаем чистый архив через git archive
+          git archive --format=tar.gz -o deploy.tar.gz HEAD
     
           # Копируем архив на сервер
           scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
           
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
-            
-            PROJECT_DIR="/opt/myapp"
-
-            # Проверяем установлен ли Docker
-            if ! command -v docker &> /dev/null; then
-                echo "Docker not found. Please install Docker first."
-                exit 1
-            fi
-
-             # Останавливаем старые контейнеры если есть
-             cd /opt/app 2>/dev/null && sudo docker compose down || true
-      
-              # Очищаем и создаем директорию
-              sudo rm -rf /opt/app
-              sudo mkdir -p /opt/app
-              sudo chown $USER:$USER /opt/app
-              
-              # Распаковываем архив
-              tar xzf /tmp/deploy.tar.gz -C /opt/app
-              cd /opt/app
-              
-              # Создаем .env файл если нет
-              if [ ! -f .env ] && [ -f .env.example ]; then
-                cp .env.example .env
-                echo 'Created .env from .env.example'
-              elif [ ! -f .env ]; then
+          # Разворачиваем на сервере
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          set -e  
           
-              # Создаем базовый .env файл
-              cat > .env << 'ENVFILE'
-              SECRET_KEY=your-secret-key-change-this
-              DEBUG=False
-              ALLOWED_HOSTS=*
-              NAME=habits
-              USER=postgres
-              PASSWORD=15111983
-              HOST=db
-              PORT=5432
-              CELERY_BROKER_URL=redis://redis:6379/1
-              CELERY_RESULT_BACKEND=redis://redis:6379/1
-              ENVFILE
-              echo 'Created basic .env file'
-            fi
-              
-              # Проверяем что файлы на месте
-              echo '=== Files in /opt/app ==='
-              ls -la
-              
-              # Запускаем приложение
-              sudo docker compose up -d --build
-              
+          # Проверяем установлен ли Docker
+          if ! command -v docker &> /dev/null; then
+              echo "Docker not found. Please install Docker first."
+              exit 1
+          fi
+
+          # Останавливаем старые контейнеры если есть
+          cd /opt/app 2>/dev/null && sudo docker compose down || true
+    
+          # Очищаем и создаем директорию
+          sudo rm -rf /opt/app
+          sudo mkdir -p /opt/app
+          sudo chown $USER:$USER /opt/app
+          
+          # Распаковываем архив
+          tar xzf /tmp/deploy.tar.gz -C /opt/app
+          cd /opt/app
+          
+          # Создаем .env файл если нет
+          if [ ! -f .env ] && [ -f .env.example ]; then
+            cp .env.example .env
+            echo 'Created .env from .env.example'
+          elif [ ! -f .env ]; then
+      
+            # Создаем базовый .env файл
+            cat > .env << 'ENVFILE'
+            SECRET_KEY=your-secret-key-change-this
+            DEBUG=False
+            ALLOWED_HOSTS=*
+            NAME=habits
+            USER=postgres
+            PASSWORD=15111983
+            HOST=db
+            PORT=5432
+            CELERY_BROKER_URL=redis://redis:6379/1
+            CELERY_RESULT_BACKEND=redis://redis:6379/1
+            ENVFILE
+            echo 'Created basic .env file'
+          fi
+          
+          # Проверяем что файлы на месте
+          echo '=== Files in /opt/app ==='
+          ls -la
+          
+          # Запускаем приложение
+          sudo docker compose up -d --build
+          
+          echo '=== Deployment completed ==='
+          sudo docker compose ps
+          EOF
 
 #  deploy:
 #    runs-on: ubuntu-latest
