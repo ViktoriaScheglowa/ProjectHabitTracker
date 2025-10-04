@@ -165,43 +165,43 @@ jobs:
           echo "Docker installed and running!"
           EOF
 
-      - name: Deploy Application
-        run: |
-          # Создаем архив
-          git archive --format=tar.gz -o deploy.tar.gz HEAD
-          
-          # Добавляем .env в архив
-          tar -rf deploy.tar.gz .env
-          
-          # Копируем архив на сервер
-          scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
-          
-          # Деплой
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'DEPLOY_EOF'
-          set -e
-
-          echo "=== Starting deployment ==="
-    
-          # Создаем директорию
-          sudo mkdir -p /opt/app
-          sudo chown $USER:$USER /opt/app
-    
-          # Распаковываем архив
-          tar xzf /tmp/deploy.tar.gz -C /opt/app
-          cd /opt/app
-    
-          # Проверяем файлы
-          echo "=== Files in /opt/app ==="
-          ls -la
-    
-          # Запускаем приложение
-          echo "=== Starting containers ==="
-          sudo docker compose down 2>/dev/null || true
-          sudo docker compose up -d --build
-    
-          echo "=== Deployment completed ==="
-          sudo docker compose ps
-          DEPLOY_EOF
+#      - name: Deploy Application
+#        run: |
+#          # Создаем архив
+#          git archive --format=tar.gz -o deploy.tar.gz HEAD
+#
+#          # Добавляем .env в архив
+#          tar -rf deploy.tar.gz .env
+#
+#          # Копируем архив на сервер
+#          scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
+#
+#          # Деплой
+#          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'DEPLOY_EOF'
+#          set -e
+#
+#          echo "=== Starting deployment ==="
+#
+#          # Создаем директорию
+#          sudo mkdir -p /opt/app
+#          sudo chown $USER:$USER /opt/app
+#
+#          # Распаковываем архив
+#          tar xzf /tmp/deploy.tar.gz -C /opt/app
+#          cd /opt/app
+#
+#          # Проверяем файлы
+#          echo "=== Files in /opt/app ==="
+#          ls -la
+#
+#          # Запускаем приложение
+#          echo "=== Starting containers ==="
+#          sudo docker compose down 2>/dev/null || true
+#          sudo docker compose up -d --build
+#
+#          echo "=== Deployment completed ==="
+#          sudo docker compose ps
+#          DEPLOY_EOF
 
 #  deploy:
 #    runs-on: ubuntu-latest
