@@ -9,29 +9,115 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Habit',
+            name="Habit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('location', models.CharField(help_text='Место, в котором необходимо выполнять привычку', max_length=30, verbose_name='Место')),
-                ('date_deadline', models.DateField(default=django.utils.timezone.now, help_text='Дата, когда необходимо выполнять привычку', verbose_name='Дата выполнения привычки')),
-                ('time_deadline', models.TimeField(help_text='Время, когда необходимо выполнять привычку', verbose_name='Время выполнения привычки')),
-                ('action', models.CharField(help_text='Действие, которое представляет собой привычка', max_length=50, verbose_name='Действие')),
-                ('is_enjoyable', models.BooleanField(help_text='Привычка, способ вознаградить себя за выполнение полезной привычки', verbose_name='Признак приятной привычки')),
-                ('periodicity', models.PositiveSmallIntegerField(default=1, help_text='Периодичность выполнения привычки для напоминания в днях', verbose_name='Периодичность')),
-                ('reward', models.CharField(blank=True, help_text='Вознаграждение за выполнение привычки', max_length=50, null=True, verbose_name='Вознаграждение')),
-                ('time_to_complete', models.PositiveIntegerField(blank=True, help_text='Время, которое предположительно нужно потратить на выполнение привычки. Укажите в минутах', null=True, verbose_name='Время на выполнение')),
-                ('is_public', models.BooleanField(default=False, help_text='Привычки можно публиковать в общий доступ, чтобы другие пользователи могли брать в пример Ваши привычки', verbose_name='Признак публичности')),
-                ('is_active', models.BooleanField(default=True, verbose_name='Признак активности')),
-                ('associated_habit', models.ForeignKey(blank=True, help_text='Привычка, которая связана с другой привычкой, важно указывать для полезных привычек, но не для приятных', null=True, on_delete=django.db.models.deletion.CASCADE, to='habits.habit', verbose_name='Связанная привычка')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "location",
+                    models.CharField(
+                        help_text="Место, в котором необходимо выполнять привычку",
+                        max_length=30,
+                        verbose_name="Место",
+                    ),
+                ),
+                (
+                    "date_deadline",
+                    models.DateField(
+                        default=django.utils.timezone.now,
+                        help_text="Дата, когда необходимо выполнять привычку",
+                        verbose_name="Дата выполнения привычки",
+                    ),
+                ),
+                (
+                    "time_deadline",
+                    models.TimeField(
+                        help_text="Время, когда необходимо выполнять привычку",
+                        verbose_name="Время выполнения привычки",
+                    ),
+                ),
+                (
+                    "action",
+                    models.CharField(
+                        help_text="Действие, которое представляет собой привычка",
+                        max_length=50,
+                        verbose_name="Действие",
+                    ),
+                ),
+                (
+                    "is_enjoyable",
+                    models.BooleanField(
+                        help_text="Привычка, способ вознаградить себя за выполнение полезной привычки",
+                        verbose_name="Признак приятной привычки",
+                    ),
+                ),
+                (
+                    "periodicity",
+                    models.PositiveSmallIntegerField(
+                        default=1,
+                        help_text="Периодичность выполнения привычки для напоминания в днях",
+                        verbose_name="Периодичность",
+                    ),
+                ),
+                (
+                    "reward",
+                    models.CharField(
+                        blank=True,
+                        help_text="Вознаграждение за выполнение привычки",
+                        max_length=50,
+                        null=True,
+                        verbose_name="Вознаграждение",
+                    ),
+                ),
+                (
+                    "time_to_complete",
+                    models.PositiveIntegerField(
+                        blank=True,
+                        help_text="Время, которое предположительно нужно потратить на выполнение привычки. Укажите в минутах",
+                        null=True,
+                        verbose_name="Время на выполнение",
+                    ),
+                ),
+                (
+                    "is_public",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Привычки можно публиковать в общий доступ, чтобы другие пользователи могли брать в пример Ваши привычки",
+                        verbose_name="Признак публичности",
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True, verbose_name="Признак активности"
+                    ),
+                ),
+                (
+                    "associated_habit",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Привычка, которая связана с другой привычкой, важно указывать для полезных привычек, но не для приятных",
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="habits.habit",
+                        verbose_name="Связанная привычка",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Привычка',
-                'verbose_name_plural': 'Привычки',
+                "verbose_name": "Привычка",
+                "verbose_name_plural": "Привычки",
             },
         ),
     ]
