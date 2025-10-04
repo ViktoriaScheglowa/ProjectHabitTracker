@@ -180,59 +180,59 @@ jobs:
           CELERY_RESULT_BACKEND=redis://redis:6379/1
           EOF
 
+      - name: Create .env file
+        run: |
+              cat > .env << 'ENV_EOF'
+          SECRET_KEY=your-secret-key-change-this
+          DEBUG=False
+          ALLOWED_HOSTS=*
+          NAME=habits
+          USER=postgres
+          PASSWORD=15111983
+          HOST=db
+          PORT=5432
+          CELERY_BROKER_URL=redis://redis:6379/1
+          CELERY_RESULT_BACKEND=redis://redis:6379/1
+          ENV_EOF
+
       - name: Deploy Application
         run: |
           # Создаем архив
           git archive --format=tar.gz -o deploy.tar.gz HEAD
-  
-          # Создаем .env файл
-          cat > .env << 'EOF'
-SECRET_KEY=your-secret-key-change-this
-DEBUG=False
-ALLOWED_HOSTS=*
-NAME=habits
-USER=postgres
-PASSWORD=15111983
-HOST=db
-PORT=5432
-CELERY_BROKER_URL=redis://redis:6379/1
-CELERY_RESULT_BACKEND=redis://redis:6379/1
-EOF
+          
+          # Добавляем .env в архив
+          tar -rf deploy.tar.gz .env
+          
+          # Копируем архив на сервер
+          scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
+          
+          # Деплой
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'DEPLOY_EOF'
+          set -e
 
-        # Добавляем .env в архив
-        tar -rf deploy.tar.gz .env
+          echo "=== Starting deployment ==="
     
-        # Копируем архив на сервер
-        scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
-        
-        # Прямой деплой без скрипта
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-set -e
+          # Создаем директорию
+          sudo mkdir -p /opt/app
+          sudo chown $USER:$USER /opt/app
+    
+          # Распаковываем архив
+          tar xzf /tmp/deploy.tar.gz -C /opt/app
+          cd /opt/app
+    
+          # Проверяем файлы
+          echo "=== Files in /opt/app ==="
+          ls -la
+    
+          # Запускаем приложение
+          echo "=== Starting containers ==="
+          sudo docker compose down 2>/dev/null || true
+          sudo docker compose up -d --build
+    
+          echo "=== Deployment completed ==="
+          sudo docker compose ps
+          DEPLOY_EOF
 
-echo "=== Starting deployment ==="
-
-# Создаем директорию
-sudo mkdir -p /opt/app
-sudo chown $USER:$USER /opt/app
-
-# Распаковываем архив
-tar xzf /tmp/deploy.tar.gz -C /opt/app
-cd /opt/app
-
-# Проверяем файлы
-echo "=== Files in /opt/app ==="
-ls -la
-echo "=== .env exists ==="
-ls -la .env
-
-# Запускаем приложение
-echo "=== Starting containers ==="
-sudo docker compose down 2>/dev/null || true
-sudo docker compose up -d --build
-
-echo "=== Deployment completed ==="
-sudo docker compose ps
-EOF
 #  deploy:
 #    runs-on: ubuntu-latest
 #    needs: build
