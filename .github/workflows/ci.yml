@@ -173,8 +173,9 @@ jobs:
           # Копируем архив на сервер
           scp -o StrictHostKeyChecking=no deploy.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/
           
-          # Разворачиваем на сервере
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          # Создаем скрипт деплоя локально
+          cat > deploy_script.sh << 'SCRIPT_EOF'
+          #!/bin/bash
           set -e  
           
           # Проверяем установлен ли Docker
@@ -200,20 +201,19 @@ jobs:
             cp .env.example .env
             echo 'Created .env from .env.example'
           elif [ ! -f .env ]; then
-      
             # Создаем базовый .env файл
             cat > .env << 'ENVFILE'
-            SECRET_KEY=your-secret-key-change-this
-            DEBUG=False
-            ALLOWED_HOSTS=*
-            NAME=habits
-            USER=postgres
-            PASSWORD=15111983
-            HOST=db
-            PORT=5432
-            CELERY_BROKER_URL=redis://redis:6379/1
-            CELERY_RESULT_BACKEND=redis://redis:6379/1
-            ENVFILE
+          SECRET_KEY=your-secret-key-change-this
+          DEBUG=False
+          ALLOWED_HOSTS=*
+          NAME=habits
+          USER=postgres
+          PASSWORD=15111983
+          HOST=db
+          PORT=5432
+          CELERY_BROKER_URL=redis://redis:6379/1
+          CELERY_RESULT_BACKEND=redis://redis:6379/1
+          ENV_EOF
             echo 'Created basic .env file'
           fi
           
@@ -226,7 +226,11 @@ jobs:
           
           echo '=== Deployment completed ==='
           sudo docker compose ps
-          EOF
+          SCRIPT_EOF
+          
+            # Копируем скрипт на сервер и выполняем
+            scp -o StrictHostKeyChecking=no deploy_script.sh ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/tmp/
+            ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "chmod +x /tmp/deploy_script.sh && /tmp/deploy_script.sh"
 
 #  deploy:
 #    runs-on: ubuntu-latest
