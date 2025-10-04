@@ -4,15 +4,26 @@
 
 В данной работе представлен сервис-трекер полезных привычек.
 ## Установка:
-
-Рекомендуется использовать PyCharm
-
 Ссылка для добавления проекта
 https://github.com/ViktoriaScheglowa/ProjectHabitTracker
 
 Для создания виртуального окружения и установки зависимостей используйте pip
 
 Зависимости распологаются в requirements.txt
+
+Создайте файл .env в корне проекта на основе примера .env.sample
+Запустите проект командой: docker-compose up --build
+После запуска выполните миграции: docker-compose exec web python manage.py migrate
+После запуска веб-приложение будет доступно по адресу: [http://localhost:8000] (URL)
+** Проверка работоспособности сервисов
+
+Django-приложение (web) Откройте в браузере: [http://127.0.0.0:8000/] (URL)
+Celery worker Проверьте логи Celery на выполнение задач: docker-compose logs -f celery
+PostgreSQL (db) Подключитесь к БД для проверки: docker-compose exec db psql -U your_db_user -d your_db_name
+Redis Проверьте подключение: docker-compose exec redis redis-cli ping
+** Дополнительные команды: Для просмотра запущенных контейнеров: docker-compose ps Для просмотра логов всех контейнеров: docker-compose logs Для остановки сервисов и удаления контейнеров: docker-compose down ** Документация Доступна по адресу: /docs/ и /redoc/
+Рекомендуется использовать PyCharm
+
 
 ## Использование:
 

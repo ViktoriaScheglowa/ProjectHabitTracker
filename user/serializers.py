@@ -24,7 +24,7 @@ class UserPublicSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "first_name", "country", "avatar"]
+        fields = ["first_name", "country", "avatar"]
         read_only_fields = fields
 
 
@@ -35,6 +35,7 @@ class UserDetailSerializer(ModelSerializer):
         fields = [
             "email",
             "phone",
-            "city",
+            "country",
             "avatar",
-            ]
+            "chat_id",
+        ]

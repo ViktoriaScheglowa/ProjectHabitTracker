@@ -3,12 +3,22 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import DestroyAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView, CreateAPIView
+from rest_framework.generics import (
+    DestroyAPIView,
+    UpdateAPIView,
+    RetrieveAPIView,
+    ListAPIView,
+    CreateAPIView,
+)
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from user.models import User
-from user.serializers import UserRegisterSerializer, UserPublicSerializer, UserSerializers
+from user.serializers import (
+    UserRegisterSerializer,
+    UserPublicSerializer,
+    UserSerializers,
+)
 
 
 @method_decorator(
@@ -39,7 +49,7 @@ class UserCreateAPIView(CreateAPIView):
     ),
 )
 class UserListAPIView(ListAPIView):
-    serializer_class = UserSerializers
+    serializer_class = UserPublicSerializer
     queryset = User.objects.all()
 
 
