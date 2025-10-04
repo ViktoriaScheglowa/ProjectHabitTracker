@@ -145,25 +145,25 @@ jobs:
       - name: Install Docker on Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            set -e
+          set -e
+          
+          # Проверяем установлен ли Docker
+          if ! command -v docker &> /dev/null; then
+            echo "Installing Docker..."
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sudo sh get-docker.sh
+            # Добавляем пользователя в группу docker
+            sudo usermod -aG docker $USER
             
-            # Проверяем установлен ли Docker
-            if ! command -v docker &> /dev/null; then
-              echo "Installing Docker..."
-              curl -fsSL https://get.docker.com -o get-docker.sh
-              sudo sh get-docker.sh
-              # Добавляем пользователя в группу docker
-              sudo usermod -aG docker $USER
-              
-              # Запускаем демон Docker
-              sudo systemctl enable docker
-              sudo systemctl start docker
-            fi
-            
-            # Проверяем установку
-            docker --version
-            echo "Docker installed and running!"
-            EOF
+            # Запускаем демон Docker
+            sudo systemctl enable docker
+            sudo systemctl start docker
+          fi
+          
+          # Проверяем установку
+          docker --version
+          echo "Docker installed and running!"
+          EOF
 
       - name: Deploy Application
         run: |
